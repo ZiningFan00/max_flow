@@ -64,8 +64,6 @@ def flow_with_demands(graph):
             d={v:0}
             flow_dict[u].update(d)
         return(flow_dict)
-    
-    graphR= nx.DiGraph()
 
     # compute residual graph
     def ComputeGraphR(graphNew,flow_dict):
@@ -80,93 +78,40 @@ def flow_with_demands(graph):
                 graphR.edges[v,u]['capacity']=flow_dict[u][v]
         return(graphR)
     
-    # DFS to find s-t path in residual graph
-    # def DFS(graphR):
-    #     if start == goal:
-    #     return [start]
-    #     visited = {start}
-    #     queue = deque([(start, [])])
-
-    #     while queue:
-    #         current, path = queue.popleft()
-    #         visited.add(current)
-    #         for neighbor in graph[current]:
-    #             if neighbor == goal:
-    #                 return path + [current, neighbor]
-    #             if neighbor in visited:
-    #                 continue
-    #             queue.append((neighbor, path + [current]))
-    #             visited.add(neighbor)   
-    #     return None  # no path found. not strictly needed
-    #     s=[]
-    #     s.append('s')
-    #     visited=[]
-    #     path=[]
-    #     while len(s)>0:
-    #         u=s.pop()
-    #         visited.append(u)
-    #         for v in graphR.neighbors(u):
-    #             if v=='t':
-    #                 return(path.append((u,v)))
-    #             if v in visited:
-    #                 continue
-    #             s.append(v)
-    #             path.append((u,v))
-    #                                                                                                         flow_dict=InitializeFlow_dict()
-    
-    
-    # graphR=ComputeGraphR(graphNew,flow_dict)
-    # path=DFS(graphR)
-    
-    # # augment path
-    # def AugmentPath(graphNew,graphR,flow_dict,path):
-    #     bottleneck=min(graphR.edges[u,v]['capacity'] for (u,v) in path)
-    #     for u,v in path:
-    #         if u,v in graphNew.edges():
-    #             flow_dict[u][v]=flow_dict[u][v]+bottleneck
-    #         if v,u in graphNew.edges():
-    #             graphNew.add_edge(u,v)
-    #             d1={u:{}}
-    #             flow_dict.update(d1)
-    #             d2={v:0}
-    #             flow_dict[u].update(d2)
-    #             flow_dict[u][v]=
+    def AugmentPath(graphNew,graphR,path,flow_dict):
+        bottleneck=min(graphR.edges[u,v]['capacity'] for (u,v) in path)
+        for u,v in path:
+            if u,v in graphNew.edges():
+                flow_dict[u][v]=flow_dict[u][v]+bottleneck
+            if v,u in graphNew.edges():
 
 
+    flow_dict=InitializeFlow_dict()
+    graphR= nx.DiGraph()
+    graphR=ComputeGraphR(graphNew,flow_dict)
+    path=BFS(graphR)
+
+    while len(path)>0:
+        flow_dict=AugmentPath(graphNew,graphR,path,flow_dict)
+        graphR=ComputeGraphR(graphNew,flow_dict)
+        path=BFS(graphR)
 
     a=0
-    # use bfs to find s-t path
-    # path=[]
-    # visited=[]
-    # path.append['s'] 
-    # while path:
-    #     u=path.pop()
-    #     if u not in visited:
-    #         visited.append(u)
-    #         for u,v in graphNew:
-    #             if neighbor not in visited:
-    #                 s.append(neigA/.A/hbor)
-
-    # def bfs(graph, start, end):
-    # # maintain a queue of paths
-    # queue = []
-    # visited=[]
 
     # flow_value, flow_dict = nx.maximum_flow(graphNew, 's', 't',capacity='capacity')
-    # del flow_dict['s']
-    # del flow_dict['t']
+    del flow_dict['s']
+    del flow_dict['t']
     
-    # for s1 in list(flow_dict):
-    #     for s2 in list(flow_dict[s1]):
-    #         if s2 =='t':
-    #             del flow_dict[s1]['t']
+    for s1 in list(flow_dict):
+        for s2 in list(flow_dict[s1]):
+            if s2 =='t':
+                del flow_dict[s1]['t']
     
-    # return(flow_dict)
-    # if flow_value == f:
-    #     return(flow_dict)
-    # else:
-    #     raise ValueError('NetworkXUnfeasible')
-    return()
+    return(flow_dict)
+    if flow_value == f:
+        return(flow_dict)
+    else:
+        raise ValueError('NetworkXUnfeasible')
 
 def divergence(flow):
     """Computes the total flow into each node according to the given flow dict.
