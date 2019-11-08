@@ -16,6 +16,7 @@ uniform_capacity = 16
 for (s1, s2) in G.edges():
     G.edges[s1, s2]['capacity'] = uniform_capacity
 
+
 def flow_with_demands(graph):
     """Computes a flow with demands over the given graph.
     
@@ -31,7 +32,51 @@ def flow_with_demands(graph):
         NetworkXUnfeasible: An error is thrown if there is no flow satisfying the demands.
     """
     # TODO: Implement the function.
+
+    def InitializeFlow_dict():
+        flow_dict={}
+        for state in graphNew.nodes():
+            d={state:{}}
+            flow_dict.update(d)
     
+        for u,v in graphNew.edges():
+            d={v:0}
+            flow_dict[u].update(d)
+        return(flow_dict)
+    
+    def ComputeGraphR(graphNew,graphR,flow_dict):
+        for u,v in graphNew.edges():
+            if flow_dict[u][v]<graphNew.edges[u,v]['capacity']:
+                graphR.edges[u,v]['capacity']=graphNew.edges[u,v]['capacity']-flow_dict[u][v]
+            if flow_dict[u][v]>0:
+                graphR.edges[v,u]['capacity']=flow_dict[u][v]
+        return(graphR)
+
+    def bfs(graphR):
+        paths = []
+        stpath=[]
+        paths.append('s')
+        while paths:
+            path = paths.pop(0)
+            node = path[-1]
+            if node == 't':
+                for i in range(0,len(path)-1):
+                    stpath.append([path[i],path[i+1]])
+                return(stpath)
+            for neighbor in graphR.neighbors(node):
+                new_path = list(path)
+                new_path.append(neighbor)
+                paths.append(new_path)
+
+    def AugmentPath(graphNew,graphR,path,flow_dict):
+        bottleneck=min(graphR.edges[u,v]['capacity'] for (u,v) in path)
+        for u,v in path:
+            if (u,v) in graphR.edges():
+                flow_dict[u][v]=flow_dict[u][v]+bottleneck
+            elif (v,u) in graphNew.edges():
+                flow_dict[v][u]=flow_dict[v][u]-bottleneck
+        return(flow_dict)            
+
     # add super source node and super sink node 
     graphNew=graph.copy()
 
@@ -41,7 +86,7 @@ def flow_with_demands(graph):
     graphNew.node['t']['demand'] = 0   
     
     f=0
-    
+
     # add adajcent edges and assign capacities
     for state in graphNew.nodes():
         d=graphNew.node[state]['demand']
@@ -54,66 +99,32 @@ def flow_with_demands(graph):
             graphNew.add_edge(state,'t')
             graphNew.edges[state,'t']['capacity']=d
     
-    def InitializeFlow_dict():
-        flow_dict={}
-        for state in graphNew.nodes():
-            d={state:{}}
-            flow_dict.update(d)
-    
-        for u,v in graphNew.edges():
-            d={v:0}
-            flow_dict[u].update(d)
-        return(flow_dict)
-
-    # compute residual graph
-    def ComputeGraphR(graphNew,flow_dict):
-        for state in graphNew.nodes():
-            graphR.add_node(state)
-        for u,v in graphNew.edges():
-            if flow_dict[u][v]<graphNew.edges[u,v]['capacity']:
-                graphR.add_edge(u,v)
-                graphR.edges[u,v]['capacity']=graphNew.edges[u,v]['capacity']-flow_dict[u][v]
-            if flow_dict[u][v]>0:
-                graphR.add_edge(v,u)
-                graphR.edges[v,u]['capacity']=flow_dict[u][v]
-        return(graphR)
-    
-    def BFS(graphR):
-        
-    def AugmentPath(graphNew,graphR,path,flow_dict):
-        bottleneck=min(graphR.edges[u,v]['capacity'] for (u,v) in path)
-        for u,v in path:
-            if u,v in graphNew.edges():
-                flow_dict[u][v]=flow_dict[u][v]+bottleneck
-            if v,u in graphNew.edges():
-
-
     flow_dict=InitializeFlow_dict()
-    graphR= nx.DiGraph()
-    graphR=ComputeGraphR(graphNew,flow_dict)
-    path=BFS(graphR)
+    graphR=graphNew.copy()
+    path=bfs(graphR)
 
     while len(path)>0:
         flow_dict=AugmentPath(graphNew,graphR,path,flow_dict)
-        graphR=ComputeGraphR(graphNew,flow_dict)
-        path=BFS(graphR)
-
+        graphR=ComputeGraphR(graphNew,graphR,flow_dict)
+        path=bfs(graphR)
     a=0
-
-    # flow_value, flow_dict = nx.maximum_flow(graphNew, 's', 't',capacity='capacity')
-    del flow_dict['s']
-    del flow_dict['t']
-    
-    for s1 in list(flow_dict):
-        for s2 in list(flow_dict[s1]):
-            if s2 =='t':
-                del flow_dict[s1]['t']
     
     return(flow_dict)
-    if flow_value == f:
-        return(flow_dict)
-    else:
-        raise ValueError('NetworkXUnfeasible')
+
+    # flow_value, flow_dict = nx.maximum_flow(graphNew, 's', 't',capacity='capacity')
+    # del flow_dict['s']
+    # del flow_dict['t']
+    
+    # for s1 in list(flow_dict):
+    #     for s2 in list(flow_dict[s1]):
+    #         if s2 =='t':
+    #             del flow_dict[s1]['t']
+    
+    # return(flow_dict)
+    # if flow_value == f:
+    #     return(flow_dict)
+    # else:
+    #     raise ValueError('NetworkXUnfeasible')
 
 def divergence(flow):
     """Computes the total flow into each node according to the given flow dict.
