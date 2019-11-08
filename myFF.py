@@ -48,6 +48,8 @@ def flow_with_demands(graph):
         for u,v in graphNew.edges():
             if flow_dict[u][v]<graphNew.edges[u,v]['capacity']:
                 graphR.edges[u,v]['capacity']=graphNew.edges[u,v]['capacity']-flow_dict[u][v]
+                if graphR.edges[u,v]['capacity']==0:
+                    graphR.remove_edge(u,v)
             if flow_dict[u][v]>0:
                 graphR.edges[v,u]['capacity']=flow_dict[u][v]
         return(graphR)
