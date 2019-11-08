@@ -78,6 +78,8 @@ def flow_with_demands(graph):
                 graphR.edges[v,u]['capacity']=flow_dict[u][v]
         return(graphR)
     
+    def BFS(graphR):
+        
     def AugmentPath(graphNew,graphR,path,flow_dict):
         bottleneck=min(graphR.edges[u,v]['capacity'] for (u,v) in path)
         for u,v in path:
