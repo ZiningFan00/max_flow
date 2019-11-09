@@ -49,38 +49,46 @@ def flow_with_demands(graph):
     def ComputeGraphR(graphNew,flow_dict):
         graphR=graphNew.copy()
         for u,v in graphNew.edges():
-            if flow_dict[u][v] < graphNew.edges[u,v]['capacity']:
+            if flow_dict[u][v]>=graphNew.edges[u,v]['capacity']:
+                graphR.remove_edge(u,v)
+            elif flow_dict[u][v] < graphNew.edges[u,v]['capacity']:
                 graphR.add_edge(u,v)
                 graphR.edges[u,v]['capacity']=graphNew.edges[u,v]['capacity']-flow_dict[u][v]
                 if graphR.edges[u,v]['capacity']==0:
                     graphR.remove_edge(u,v)
-            if flow_dict[u][v]>0:
+            elif flow_dict[u][v]>0:
                 graphR.add_edge(v,u)
                 graphR.edges[v,u]['capacity']=flow_dict[u][v]
-            if flow_dict[u][v]==graphNew.edges[u,v]['capacity']:
-                graphR.remove_edge(u,v)
-
-        # nx.draw(graphR)
-        # plt.show()
+            
         return(graphR)
 
-    def bfs(graphR):
-        paths = []
-        stpath=[]
-        paths.append('s')
-        while paths:
-            path = paths.pop(0)
-            node = path[-1]
-            if node == 't':
-                for i in range(0,len(path)-1):
-                    stpath.append([path[i],path[i+1]])
-                return(stpath)
-            for neighbor in graphR.neighbors(node):
-                new_path = list(path)
-                new_path.append(neighbor)
-                paths.append(new_path)
-
-        return()
+    def dfs(graphR):
+        s=[]
+        s.append('s')
+        visited=[]
+        prev={}
+        while len(s)>0:
+            u=s.pop()   
+            if u not in visited:
+                visited.append(u)
+                for neighbor in sorted(graphR.neighbors(u)):
+                    if neighbor not in visited:
+                        d={neighbor:u}
+                        prev.update(d)
+                        s.append(neighbor)
+        if 't' not in prev.keys():
+            return()
+        else:
+            path=[]
+            l=[]
+            l.append([prev['t'],'t'])
+            while len(l)>0:
+                e=l.pop()
+                path.append(e)
+                if e[0]=='s':
+                    return(path)
+                else:
+                    l.append([prev[e[0]],e[0]])
 
     def AugmentPath(graphNew,graphR,path,flow_dict):
         bottleneck=min(graphR.edges[u,v]['capacity'] for (u,v) in path)
@@ -115,30 +123,30 @@ def flow_with_demands(graph):
     
     flow_dict=InitializeFlow_dict()
     graphR=graphNew.copy()
-    path=bfs(graphR)
+    path=dfs(graphR)
 
     while len(path)>0:
         flow_dict=AugmentPath(graphNew,graphR,path,flow_dict)
         graphR=ComputeGraphR(graphNew,flow_dict)        
-        path=bfs(graphR)
-    a=0
+        path=dfs(graphR)
     
-    return(flow_dict)
-
     # flow_value, flow_dict = nx.maximum_flow(graphNew, 's', 't',capacity='capacity')
-    # del flow_dict['s']
-    # del flow_dict['t']
+    flow_value=0
+    for v in flow_dict['s'].keys():
+        flow_value=flow_value+flow_dict['s'][v]
+
+    del flow_dict['s']
+    del flow_dict['t']
     
-    # for s1 in list(flow_dict):
-    #     for s2 in list(flow_dict[s1]):
-    #         if s2 =='t':
-    #             del flow_dict[s1]['t']
-    
-    # return(flow_dict)
-    # if flow_value == f:
-    #     return(flow_dict)
-    # else:
-    #     raise ValueError('NetworkXUnfeasible')
+    for s1 in list(flow_dict):
+        for s2 in list(flow_dict[s1]):
+            if s2 =='t':
+                del flow_dict[s1]['t']
+
+    if flow_value == f:
+        return(flow_dict)
+    else:
+        raise ValueError('NetworkXUnfeasible')
 
 def divergence(flow):
     """Computes the total flow into each node according to the given flow dict.
@@ -163,6 +171,6 @@ def divergence(flow):
     return(div)
 
 flow=flow_with_demands(G)
-
+print(flow)
 div=divergence(flow)
 print(div)
