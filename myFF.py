@@ -80,6 +80,8 @@ def flow_with_demands(graph):
                 new_path.append(neighbor)
                 paths.append(new_path)
 
+        return()
+
     def AugmentPath(graphNew,graphR,path,flow_dict):
         bottleneck=min(graphR.edges[u,v]['capacity'] for (u,v) in path)
         for u,v in path:
@@ -105,15 +107,11 @@ def flow_with_demands(graph):
         if d < 0:
             graphNew.add_edge('s',state)
             graphNew.edges['s',state]['capacity']=-d
-            # graphNew.add_edge(state,'s')
-            # graphNew.edges[state,'s']['capacity']=-d
             # compute the sum of demands 
             f=f-d
         if d > 0:
             graphNew.add_edge(state,'t')
             graphNew.edges[state,'t']['capacity']=d
-            # graphNew.add_edge('t',state)
-            # graphNew.edges['t',state]['capacity']=d
     
     flow_dict=InitializeFlow_dict()
     graphR=graphNew.copy()
@@ -121,7 +119,7 @@ def flow_with_demands(graph):
 
     while len(path)>0:
         flow_dict=AugmentPath(graphNew,graphR,path,flow_dict)
-        graphR=ComputeGraphR(graphNew,flow_dict)
+        graphR=ComputeGraphR(graphNew,flow_dict)        
         path=bfs(graphR)
     a=0
     
