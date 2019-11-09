@@ -1,3 +1,5 @@
+import networkx as nx
+
 graph = {
         '1': ['2', '3', '4'],
         '2': ['5', '6'],
@@ -6,10 +8,21 @@ graph = {
         '7': ['11', '12']
         }
 
-def bfs(graph, start, end):
+G = nx.DiGraph()
+
+for u in graph.keys():
+    for v in graph[u]:
+        G.add_edge(u,v)
+
+# G=nx.DiGraph()
+
+for neighbor in G.neighbors('11'):
+    print("a")
+
+def bfs(graph):
     paths = []
     stpath=[]
-    paths.append('s')
+    paths.append('8')
     while paths:
         path = paths.pop(0)
         node = path[-1]
@@ -21,5 +34,7 @@ def bfs(graph, start, end):
             new_path = list(path)
             new_path.append(neighbor)
             paths.append(new_path)
+    
+    return()
 
-print(bfs(graph, '1', '11'))
+print(bfs(graph))
