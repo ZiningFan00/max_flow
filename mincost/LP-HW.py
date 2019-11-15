@@ -1,4 +1,5 @@
 import networkx as nx
+import matplotlib as plt
 def create_graph(infile):
     """Creates a directed graph as specified by the input file. Edges are annotated with 'capacity'
     and 'weight' attributes, and nodes are annotated with 'demand' attributes.
@@ -16,21 +17,26 @@ def create_graph(infile):
     f = open(infile)
     for line in f:
         lis=line.strip().split()
+        if len(lis)==0:
+            break
+        if lis[0]=='p':
+            num=int(lis[2])
+            for i in range(1,num+1):
+                G.add_node(str(i))
+                G.node[str(i)]['demand']=0
         if lis[0]=='n':
             n=lis[1]
-            G.add_node(n)
             G.node[n]['demand']=int(lis[2])
-        # if lis[0]=='a':
-        #     s1=
-        #     s2=
-        #     G.add_edge(lis[1],lis[2])
-        #     G.edges[lis[1],lis[2]]['capacity']=int(lis[4])
-        #     G.edges[lis[1],lis[2]]['cost']=int(lis[5])
-
-        # if lis[0]=='a':
-        #     G.add_edge
+        if lis[0]=='a':
+            s1=lis[1]
+            s2=lis[2]
+            G.add_edge(s1,s2)
+            G.edges[s1,s2]['capacity']=int(lis[4])
+            G.edges[s1,s2]['cost']=int(lis[5])
 
     return(G)
 
-
 G_40=create_graph('gte_bad.40')
+a=0
+# nx.draw(G_40)
+# plt.imshow()
