@@ -32,11 +32,13 @@ def create_graph(infile):
             s2=lis[2]
             G.add_edge(s1,s2)
             G.edges[s1,s2]['capacity']=int(lis[4])
-            G.edges[s1,s2]['cost']=int(lis[5])
+            G.edges[s1,s2]['weight']=int(lis[5])
 
     return(G)
 
 G_40=create_graph('gte_bad.40')
-a=0
+print(nx.min_cost_flow_cost(G_40))
+print("Correct value for _40 instance:", nx.flow.min_cost_flow_cost(G_40) == 52099553858)
+
 # nx.draw(G_40)
 # plt.imshow()
