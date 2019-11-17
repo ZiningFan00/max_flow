@@ -1,5 +1,5 @@
 import networkx as nx
-import matplotlib as plt
+import pulp
 def create_graph(infile):
     """Creates a directed graph as specified by the input file. Edges are annotated with 'capacity'
     and 'weight' attributes, and nodes are annotated with 'demand' attributes.
@@ -12,7 +12,7 @@ def create_graph(infile):
         and nodes annotated with 'demand' attributes.
     """
     # TODO: implement function
-    G=nx.DiGraph()
+    G=nx.MultiDiGraph()
 
     f = open(infile)
     for line in f:
@@ -26,19 +26,23 @@ def create_graph(infile):
                 G.node[str(i)]['demand']=0
         if lis[0]=='n':
             n=lis[1]
-            G.node[n]['demand']=int(lis[2])
+            G.node[n]['demand']=float(lis[2])
         if lis[0]=='a':
             s1=lis[1]
             s2=lis[2]
-            G.add_edge(s1,s2)
-            G.edges[s1,s2]['capacity']=int(lis[4])
-            G.edges[s1,s2]['weight']=int(lis[5])
-
+            G.add_edge(s1,s2,capacity=float(lis[4]),weight=float(lis[5]))
+    
     return(G)
 
-G_40=create_graph('gte_bad.40')
-print(nx.min_cost_flow_cost(G_40))
-print("Correct value for _40 instance:", nx.flow.min_cost_flow_cost(G_40) == 52099553858)
+# def lp_flow_value(G):
+    
+#     # reduce multigraph to simple graph
+#     for s1,s2 in G.edges():
+#         if len(G.adj[s1][s2])>1:
+            
+#         print(G.adj[s1][s2])
+#         a=1
 
-# nx.draw(G_40)
-# plt.imshow()
+G_40 = create_graph('mincost/gte_bad.40')
+flow=nx.min_cost_flow(G_40,demand='demand',capacity='capacity',weight='weight')
+a=0
