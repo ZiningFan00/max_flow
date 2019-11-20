@@ -39,16 +39,33 @@ def create_graph(infile):
 
     return(G)
 
-# def lp_flow_value(G):
-    
-#     # reduce multigraph to simple graph
-#     for s1,s2 in G.edges():
-#         if len(G.adj[s1][s2])>1:
-            
-#         print(G.adj[s1][s2])
-#         a=1
+def lp_flow_value(G):
+    LP = pulp.LpProblem("My LP Problem", pulp.LpMinimize)
+    flow=[]
+    ob_func=0
 
+    for node in G.nodes():
+        G.nodes[node]['in']=0
+        G.nodes[node]['out']=0
+    
+    for s1,s2 in G.edges():
+        flow.append(pulp.LpVariable(s1+'_'+s2,lowBound=0,upBound=G.edges[s1,s2]['capacity'],cat='Continuous'))
+
+    for edge in flow:
+        s1,s2=str(edge).split('_')
+        ob_func=ob_func+G.edges[s1,s2]['weight']*edge
+        G.node[s1]['out']=G.node[s1]['out']+edge
+        G.node[s2]['in']=G.node[s2]['in']+edge
+    
+    LP += ob_func
+    for node in G.nodes():
+        LP += G.nodes[node]['demand']==G.nodes[node]['in']-G.nodes[node]['out']
+    
+    LP.solve()
+    return(int(pulp.value(LP.objective)))
+    
 G_40 = create_graph('mincost/gte_bad.40')
+print(lp_flow_value(G_40))
+print( "Correct value for _40 instance:", lp_flow_value(G_40) == 52099553858)
 print(nx.flow.min_cost_flow_cost(G_40))
 print("Correct value for _40 instance:", nx.flow.min_cost_flow_cost(G_40) == 52099553858)
-a=0
